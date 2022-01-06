@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { RouteComponentProps } from '@reach/router';
 import styled from 'styled-components';
 
 import breakpoints, { pageGutter } from 'components/core/breakpoints';
@@ -8,21 +7,20 @@ import ActionText from 'components/core/ActionText/ActionText';
 import useNft from 'hooks/api/nfts/useNft';
 import Page from 'components/core/Page/Page';
 import ShimmerProvider from 'contexts/shimmer/ShimmerContext';
-import { useGalleryNavigationActions } from 'contexts/navigation/GalleryNavigationContext';
 import GalleryRedirect from 'scenes/_Router/GalleryRedirect';
 import NftDetailAsset from './NftDetailAsset';
 import NftDetailText from './NftDetailText';
 import { useRouter } from 'next/router';
+import { useCanGoBack } from 'contexts/navigation/CanGoBackProvider';
 
 type Props = {
-  collectionId: string;
   nftId: string;
 };
 
-function NftDetailPage({ nftId }: RouteComponentProps<Props>) {
-  const { getVisitedPagesLength } = useGalleryNavigationActions();
+function NftDetailPage({ nftId }: Props) {
+  const { replace, back } = useRouter();
+  const canGoBack = useCanGoBack();
 
-  const { push, back } = useRouter();
   const handleBackClick = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
       const username = window.location.pathname.split('/')[1];
@@ -32,22 +30,19 @@ function NftDetailPage({ nftId }: RouteComponentProps<Props>) {
         return;
       }
 
-      const visitedPagesLength = getVisitedPagesLength();
-
-      // if the user arrived on the page via direct link, send them to the
-      // owner's profile page (since there is no "previous page")
-      if (visitedPagesLength === 1) {
+      if (canGoBack) {
+        // If the user has history in their stack, simply send them back to where they came from.
+        // this ensures scroll position is maintained when going back (see: GalleryNavigationContext.tsx)
+        back();
+      } else {
+        // if the user arrived on the page via direct link, send them to the
+        // owner's profile page (since there is no "previous page")
         // NOTE: this scheme will have to change if we no longer have the
         // username included in the URL
-        void push(`/${username}`);
-        return;
+        void replace(`/${username}`);
       }
-
-      // otherwise, simply send them back to where they came from. this ensures scroll
-      // position is maintained when going back (see: GalleryNavigationContext.tsx)
-      back();
     },
-    [back, getVisitedPagesLength, push]
+    [back, canGoBack, replace]
   );
 
   const nft = useNft({ id: nftId ?? '' });
