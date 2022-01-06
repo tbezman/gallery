@@ -1,5 +1,4 @@
 import breakpoints, { pageGutter, size } from 'components/core/breakpoints';
-import { RouteComponentProps } from '@reach/router';
 import Page from 'components/core/Page/Page';
 import styled from 'styled-components';
 import detectMobileDevice from 'utils/detectMobileDevice';
@@ -10,6 +9,8 @@ import { useBreakpoint } from 'hooks/useWindowSize';
 import usePrevious from 'hooks/usePrevious';
 import UserGallery from './UserGallery';
 import UserGalleryPageErrorBoundary from './UserGalleryPageErrorBoundary';
+import { useRouter } from 'next/router';
+import GalleryRedirect from 'scenes/_Router/GalleryRedirect';
 
 type Props = {
   username: string;
@@ -54,7 +55,11 @@ function useSuggestion() {
   ]);
 }
 
-function UserGalleryPage({ username }: RouteComponentProps<Props>) {
+type UserGalleryPageProps = {
+  username: string;
+};
+
+function UserGalleryPage({ username }: UserGalleryPageProps) {
   useSuggestion();
 
   return (
