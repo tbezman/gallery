@@ -1,4 +1,4 @@
-import { FC, ComponentType } from 'react';
+import { FC, ComponentType, useEffect } from 'react';
 
 import 'src/components/FadeTransitioner/transition.css';
 import 'src/scenes/WelcomeAnimation/intro.css';
@@ -9,6 +9,7 @@ import Head from 'next/head';
 import AppProvider from 'contexts/AppProvider';
 import FadeTransitioner from 'components/FadeTransitioner/FadeTransitioner';
 import { useRouter } from 'next/router';
+import Mixpanel from 'utils/mixpanel';
 
 const SafeHydrate: FC = ({ children }) => (
   <div suppressHydrationWarning>{typeof window === 'undefined' ? null : children}</div>
@@ -19,6 +20,10 @@ const App: FC<{
   pageProps: Record<string, unknown>;
 }> = ({ Component, pageProps }) => {
   const { asPath } = useRouter();
+
+  useEffect(() => {
+    Mixpanel.track('Page view', { path: asPath });
+  }, [asPath]);
 
   return (
     <>
